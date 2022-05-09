@@ -1,3 +1,4 @@
+require("dotenv").config();
 const puppeteer = require("puppeteer");
 
 module.exports = class Scrape {
@@ -8,7 +9,12 @@ module.exports = class Scrape {
   async getQuestions() {
     const questions = [];
 
-    const browser = await puppeteer.launch({});
+    const browser = await puppeteer.launch(
+      {
+        headless: true,
+        args: ['--no-sandbox']
+      }
+    );
     const page = await browser.newPage();
 
     await page.goto(this.url);
@@ -32,9 +38,15 @@ module.exports = class Scrape {
             "div:nth-child(2) div:last-child > span:first-child",
             (c) => c.textContent
           );
-          const url = await content.$eval("div:nth-child(2) a", (c) =>
+          let url = await content.$eval("div:nth-child(2) a", (c) =>
             c.getAttribute("href")
           );
+
+          if (process.env.LEETCODE_CHINESE === "1") {
+            const urls = url.split("/");
+            urls[2] = "leetcode-cn.com";
+            url = urls.join("/");
+          }
 
           questions.push({
             id,
@@ -53,7 +65,12 @@ module.exports = class Scrape {
   }
 
   async getCategories(questions) {
-    const browser = await puppeteer.launch({});
+    const browser = await puppeteer.launch(
+      {
+        headless: true,
+        args: ['--no-sandbox']
+      }
+    );
     const page = await browser.newPage();
 
     await page.goto(this.url);

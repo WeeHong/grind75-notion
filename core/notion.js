@@ -1,6 +1,5 @@
-const axios = require("axios");
-
 require("dotenv").config();
+const axios = require("axios");
 
 module.exports = class Notion {
   constructor() {
@@ -174,14 +173,18 @@ module.exports = class Notion {
   async createQuestion(id, questions) {
     const promises = [];
     for (const question of questions) {
-      const response = await axios.post(
-        "https://api.notion.com/v1/pages",
-        this.getQuestionsRequest(id, question),
-        {
-          headers: this.getHeaders(),
-        }
-      );
-      promises.push(response);
+      try {
+        const response = await axios.post(
+          "https://api.notion.com/v1/pages",
+          this.getQuestionsRequest(id, question),
+          {
+            headers: this.getHeaders(),
+          }
+        );
+        promises.push(response);
+      } catch (e) {
+        console.log("Error happened on Axios CreateQuestion: ", e.message)
+      }
     }
     await Promise.all(promises);
   }
